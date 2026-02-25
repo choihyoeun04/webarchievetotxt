@@ -42,12 +42,19 @@ async def convert(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Server processing error")
     
+    # Generate output filename from original filename
+    original_name = file.filename or "converted"
+    if original_name.endswith('.webarchive'):
+        output_name = original_name[:-11] + '.txt'  # Remove .webarchive, add .txt
+    else:
+        output_name = original_name + '.txt'
+    
     # Return as downloadable text file
     text_bytes = text.encode('utf-8')
     return StreamingResponse(
         io.BytesIO(text_bytes),
         media_type="text/plain; charset=utf-8",
         headers={
-            "Content-Disposition": "attachment; filename=\"converted.txt\""
+            "Content-Disposition": f"attachment; filename=\"{output_name}\""
         }
     )
