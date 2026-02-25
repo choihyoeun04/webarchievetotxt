@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi.responses import StreamingResponse, HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 import io
 from app.parser import parse_webarchive
@@ -13,6 +13,18 @@ async def index():
     """Serve upload interface."""
     with open("app/static/index.html", "r") as f:
         return f.read()
+
+
+@app.get("/robots.txt")
+async def robots():
+    """Serve robots.txt for SEO."""
+    return FileResponse("app/static/robots.txt", media_type="text/plain")
+
+
+@app.get("/sitemap.xml")
+async def sitemap():
+    """Serve sitemap.xml for SEO."""
+    return FileResponse("app/static/sitemap.xml", media_type="application/xml")
 
 
 @app.get("/health")

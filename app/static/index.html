@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebArchive to Text Converter</title>
+    <title>WebArchive to Text Converter - Free Online Tool</title>
+    <meta name="description" content="Free online tool to convert iOS Safari .webarchive files to plain text. Upload your .webarchive file and download clean, readable text instantly.">
+    <meta name="keywords" content="webarchive converter, webarchive to text, ios safari converter, webarchive reader, convert webarchive">
+    <meta name="author" content="WebArchive Converter">
+    
+    <!-- Open Graph for social sharing -->
+    <meta property="og:title" content="WebArchive to Text Converter">
+    <meta property="og:description" content="Convert iOS Safari .webarchive files to plain text for free">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://webarchieve-converter.onrender.com/">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="WebArchive to Text Converter">
+    <meta name="twitter:description" content="Convert iOS Safari .webarchive files to plain text for free">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; }
@@ -19,6 +33,10 @@
         .status.error { background: #fee; color: #c00; display: block; }
         .status.success { background: #efe; color: #060; display: block; }
         .status.processing { background: #fef9e7; color: #856404; display: block; }
+        .info { margin-top: 40px; padding-top: 40px; border-top: 1px solid #eee; }
+        .info h2 { font-size: 20px; margin: 20px 0 10px; color: #333; }
+        .info p, .info li { color: #666; line-height: 1.6; margin-bottom: 10px; }
+        .info ol, .info ul { margin-left: 20px; }
     </style>
 </head>
 <body>
@@ -33,6 +51,27 @@
         </div>
         
         <div class="status" id="status"></div>
+        
+        <div class="info">
+            <h2>How to Use</h2>
+            <ol>
+                <li>Export a webpage as .webarchive from iOS Safari (Share → Save to Files)</li>
+                <li>Upload the .webarchive file using the form above</li>
+                <li>Download the converted plain text file instantly</li>
+            </ol>
+            
+            <h2>Features</h2>
+            <ul>
+                <li>Free and unlimited conversions</li>
+                <li>No registration required</li>
+                <li>Files processed securely (not stored)</li>
+                <li>Preserves paragraph structure and formatting</li>
+                <li>Supports files up to 50MB</li>
+            </ul>
+            
+            <h2>About WebArchive Format</h2>
+            <p>WebArchive is Apple's proprietary format used by Safari on iOS and macOS to save complete webpages. This tool extracts the text content from these files, making it readable on any device without requiring Apple software.</p>
+        </div>
     </div>
 
     <script>
