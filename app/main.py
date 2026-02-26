@@ -1,7 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import StreamingResponse, HTMLResponse, FileResponse
+from fastapi.responses import StreamingResponse, HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import io
+from typing import List
 from app.parser import parse_webarchive
 from app.config import MAX_FILE_SIZE, VERSION
 
@@ -39,14 +40,11 @@ async def convert(file: UploadFile = File(...)):
     if not file:
         raise HTTPException(status_code=422, detail="Missing file in request")
     
-    # Read file
     file_bytes = await file.read()
     
-    # Check file size
     if len(file_bytes) > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large (>50MB)")
     
-    # Parse and convert
     try:
         text = parse_webarchive(file_bytes)
     except ValueError as e:
@@ -54,19 +52,42 @@ async def convert(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Server processing error")
     
-    # Generate output filename from original filename
     original_name = file.filename or "converted"
-    if original_name.endswith('.webarchive'):
-        output_name = original_name[:-11] + '.txt'  # Remove .webarchive, add .txt
-    else:
-        output_name = original_name + '.txt'
+    output_name = original_name[:-11] + '.txt' if original_name.endswith('.webarchive') else original_name + '.txt'
     
-    # Return as downloadable text file
     text_bytes = text.encode('utf-8')
     return StreamingResponse(
         io.BytesIO(text_bytes),
         media_type="text/plain; charset=utf-8",
-        headers={
-            "Content-Disposition": f"attachment; filename=\"{output_name}\""
-        }
+        headers={"Content-Disposition": f"attachment; filename=\"{output_name}\""}
     )
+
+
+@app.post("/api/convert-batch")
+async def convert_batch(files: List[UploadFile] = File(...)):
+    """Convert multiple .webarchive files and return results as JSON."""
+    if not files:
+        raise HTTPException(status_code=422, detail="No files provided")
+    
+    results = []
+    for file in files:
+        file_bytes = await file.read()
+        
+        if len(file_bytes) > MAX_FILE_SIZE:
+            results.append({"filename": file.filename, "error": "File too large (>50MB)"})
+            continue
+        
+        try:
+            text = parse_webarchive(file_bytes)
+            original_name = file.filename or "converted"
+            output_name = original_name[:-11] + '.txt' if original_name.endswith('.webarchive') else original_name + '.txt'
+            results.append({"filename": output_name, "text": text})
+        except ValueError as e:
+            results.append({"filename": file.filename, "error": str(e)})
+        except Exception:
+            results.append({"filename": file.filename, "error": "Processing error"})
+    
+    return JSONResponse(content={"results": results})
+
+
+

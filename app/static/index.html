@@ -24,6 +24,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; }
+        .lang-toggle { position: fixed; top: 20px; right: 20px; }
+        .lang-toggle button { padding: 8px 16px; margin-left: 5px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .lang-toggle button.active { background: #007aff; color: white; border-color: #007aff; }
         .container { max-width: 600px; margin: 50px auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         h1 { font-size: 24px; margin-bottom: 10px; color: #333; }
         p { color: #666; margin-bottom: 30px; }
@@ -36,6 +39,17 @@
         .status.error { background: #fee; color: #c00; display: block; }
         .status.success { background: #efe; color: #060; display: block; }
         .status.processing { background: #fef9e7; color: #856404; display: block; }
+        .results { margin-top: 20px; display: none; }
+        .results.show { display: block; }
+        .result-item { padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .result-item.error { background: #fee; border-color: #fcc; }
+        .result-name { flex: 1; color: #333; font-weight: 500; }
+        .result-error { color: #c00; font-size: 14px; }
+        .btn { padding: 8px 16px; background: #007aff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .btn:hover { background: #0051d5; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #545b62; }
+        .download-all { margin-bottom: 15px; }
         .info { margin-top: 40px; padding-top: 40px; border-top: 1px solid #eee; }
         .info h2 { font-size: 20px; margin: 20px 0 10px; color: #333; }
         .info p, .info li { color: #666; line-height: 1.6; margin-bottom: 10px; }
@@ -43,37 +57,49 @@
     </style>
 </head>
 <body>
+    <div class="lang-toggle">
+        <button onclick="setLang('ko')" id="langKo" class="active">한국어</button>
+        <button onclick="setLang('en')" id="langEn">English</button>
+    </div>
+    
     <div class="container">
-        <h1>WebArchive to Text Converter</h1>
-        <p>Convert iOS Safari .webarchive files to plain text</p>
+        <h1 data-ko="WebArchive를 텍스트로 변환" data-en="WebArchive to Text Converter">WebArchive를 텍스트로 변환</h1>
+        <p data-ko="iOS Safari .webarchive 파일을 일반 텍스트로 변환" data-en="Convert iOS Safari .webarchive files to plain text">iOS Safari .webarchive 파일을 일반 텍스트로 변환</p>
         
         <div class="drop-zone" id="dropZone">
-            <input type="file" id="fileInput" accept=".webarchive">
-            <div class="drop-zone-text">Click to select or drag & drop .webarchive file</div>
-            <div class="drop-zone-hint">Maximum file size: 50MB</div>
+            <input type="file" id="fileInput" accept=".webarchive" multiple>
+            <div class="drop-zone-text" data-ko=".webarchive 파일을 클릭하거나 드래그하여 선택하세요" data-en="Click to select or drag & drop .webarchive files">.webarchive 파일을 클릭하거나 드래그하여 선택하세요</div>
+            <div class="drop-zone-hint" data-ko="최대 파일 크기: 파일당 50MB | 여러 파일 지원" data-en="Maximum file size: 50MB per file | Multiple files supported">최대 파일 크기: 파일당 50MB | 여러 파일 지원</div>
         </div>
         
         <div class="status" id="status"></div>
         
+        <div class="results" id="results">
+            <div class="download-all">
+                <button class="btn" id="downloadAllBtn" data-ko="모두 다운로드" data-en="Download All">모두 다운로드</button>
+            </div>
+            <div id="resultsList"></div>
+        </div>
+        
         <div class="info">
-            <h2>How to Use</h2>
+            <h2 data-ko="사용 방법" data-en="How to Use">사용 방법</h2>
             <ol>
-                <li>Export a webpage as .webarchive from iOS Safari (Share → Save to Files)</li>
-                <li>Upload the .webarchive file using the form above</li>
-                <li>Download the converted plain text file instantly</li>
+                <li data-ko="iOS Safari에서 웹페이지를 .webarchive로 내보내기 (공유 → 파일에 저장)" data-en="Export webpages as .webarchive from iOS Safari (Share → Save to Files)">iOS Safari에서 웹페이지를 .webarchive로 내보내기 (공유 → 파일에 저장)</li>
+                <li data-ko="위 양식을 사용하여 하나 또는 여러 .webarchive 파일 업로드" data-en="Upload one or multiple .webarchive files using the form above">위 양식을 사용하여 하나 또는 여러 .webarchive 파일 업로드</li>
+                <li data-ko="개별 파일 다운로드 또는 모두 다운로드" data-en="Download individual files or all files">개별 파일 다운로드 또는 모두 다운로드</li>
             </ol>
             
-            <h2>Features</h2>
+            <h2 data-ko="기능" data-en="Features">기능</h2>
             <ul>
-                <li>Free and unlimited conversions</li>
-                <li>No registration required</li>
-                <li>Files processed securely (not stored)</li>
-                <li>Preserves paragraph structure and formatting</li>
-                <li>Supports files up to 50MB</li>
+                <li data-ko="무료 및 무제한 변환" data-en="Free and unlimited conversions">무료 및 무제한 변환</li>
+                <li data-ko="회원가입 불필요" data-en="No registration required">회원가입 불필요</li>
+                <li data-ko="파일이 안전하게 처리됨 (저장되지 않음)" data-en="Files processed securely (not stored)">파일이 안전하게 처리됨 (저장되지 않음)</li>
+                <li data-ko="단락 구조 및 서식 유지" data-en="Preserves paragraph structure and formatting">단락 구조 및 서식 유지</li>
+                <li data-ko="최대 50MB 파일 지원" data-en="Supports files up to 50MB">최대 50MB 파일 지원</li>
             </ul>
             
-            <h2>About WebArchive Format</h2>
-            <p>WebArchive is Apple's proprietary format used by Safari on iOS and macOS to save complete webpages. This tool extracts the text content from these files, making it readable on any device without requiring Apple software.</p>
+            <h2 data-ko="WebArchive 형식 정보" data-en="About WebArchive Format">WebArchive 형식 정보</h2>
+            <p data-ko="WebArchive는 iOS 및 macOS의 Safari에서 전체 웹페이지를 저장하는 데 사용되는 Apple의 독점 형식입니다. 이 도구는 이러한 파일에서 텍스트 콘텐츠를 추출하여 Apple 소프트웨어 없이도 모든 장치에서 읽을 수 있도록 합니다." data-en="WebArchive is Apple's proprietary format used by Safari on iOS and macOS to save complete webpages. This tool extracts the text content from these files, making it readable on any device without requiring Apple software.">WebArchive는 iOS 및 macOS의 Safari에서 전체 웹페이지를 저장하는 데 사용되는 Apple의 독점 형식입니다. 이 도구는 이러한 파일에서 텍스트 콘텐츠를 추출하여 Apple 소프트웨어 없이도 모든 장치에서 읽을 수 있도록 합니다.</p>
         </div>
     </div>
 
@@ -81,12 +107,44 @@
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const status = document.getElementById('status');
+        const results = document.getElementById('results');
+        const resultsList = document.getElementById('resultsList');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        
+        let uploadedFiles = [];
+        let convertedResults = [];
+        let currentLang = 'ko';
+
+        const translations = {
+            ko: {
+                processing: '파일 처리 중...',
+                processed: '파일이 처리되었습니다. 아래 버튼을 클릭하여 다운로드하세요.',
+                error: '오류',
+                download: '다운로드'
+            },
+            en: {
+                processing: 'Processing file(s)...',
+                processed: 'Processed file(s). Click buttons below to download.',
+                error: 'Error',
+                download: 'Download'
+            }
+        };
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('langKo').classList.toggle('active', lang === 'ko');
+            document.getElementById('langEn').classList.toggle('active', lang === 'en');
+            
+            document.querySelectorAll('[data-ko]').forEach(el => {
+                el.textContent = el.getAttribute('data-' + lang);
+            });
+        }
 
         dropZone.addEventListener('click', () => fileInput.click());
         
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
+                handleFiles(Array.from(e.target.files));
             }
         });
 
@@ -103,42 +161,87 @@
             e.preventDefault();
             dropZone.classList.remove('drag-over');
             if (e.dataTransfer.files.length > 0) {
-                handleFile(e.dataTransfer.files[0]);
+                handleFiles(Array.from(e.dataTransfer.files));
             }
         });
 
-        async function handleFile(file) {
+        downloadAllBtn.addEventListener('click', downloadAllFiles);
+
+        async function handleFiles(files) {
+            uploadedFiles = files;
             status.className = 'status processing';
-            status.textContent = 'Processing...';
+            status.textContent = `${translations[currentLang].processing} ${files.length}`;
+            results.classList.remove('show');
+            resultsList.innerHTML = '';
 
             const formData = new FormData();
-            formData.append('file', file);
+            files.forEach(file => formData.append('files', file));
 
             try {
-                const response = await fetch('/api/convert', {
+                const response = await fetch('/api/convert-batch', {
                     method: 'POST',
                     body: formData
                 });
 
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Conversion failed');
+                    throw new Error('Batch conversion failed');
                 }
 
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'converted.txt';
-                a.click();
-                window.URL.revokeObjectURL(url);
-
+                const data = await response.json();
+                convertedResults = data.results;
+                displayResults(data.results);
+                
                 status.className = 'status success';
-                status.textContent = 'Conversion successful! File downloaded.';
+                status.textContent = `${translations[currentLang].processed} ${files.length}`;
             } catch (error) {
                 status.className = 'status error';
-                status.textContent = `Error: ${error.message}`;
+                status.textContent = `${translations[currentLang].error}: ${error.message}`;
             }
+        }
+
+        function displayResults(resultsData) {
+            resultsList.innerHTML = '';
+            resultsData.forEach((result, index) => {
+                const div = document.createElement('div');
+                div.className = result.error ? 'result-item error' : 'result-item';
+                
+                if (result.error) {
+                    div.innerHTML = `
+                        <div>
+                            <div class="result-name">${result.filename}</div>
+                            <div class="result-error">${result.error}</div>
+                        </div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="result-name">${result.filename}</div>
+                        <button class="btn" onclick="downloadFile(${index})">${translations[currentLang].download}</button>
+                    `;
+                }
+                resultsList.appendChild(div);
+            });
+            results.classList.add('show');
+        }
+
+        function downloadFile(index) {
+            const result = convertedResults[index];
+            if (result.error) return;
+            
+            const blob = new Blob([result.text], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = result.filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function downloadAllFiles() {
+            convertedResults.forEach((result, index) => {
+                if (!result.error) {
+                    setTimeout(() => downloadFile(index), index * 200);
+                }
+            });
         }
     </script>
 </body>
